@@ -1,5 +1,4 @@
 package com.example.day2part2.model;
-
 public class StudentModel {
     private int id;
     private String name;
