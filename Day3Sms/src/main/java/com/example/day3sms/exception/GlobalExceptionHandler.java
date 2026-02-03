@@ -1,6 +1,7 @@
 package com.example.day3sms.exception;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -28,6 +29,18 @@ public class GlobalExceptionHandler {
                 "Validation failed",
                 errorMap
         );
+    }
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNotFound(
+            ResourceNotFoundException ex) {
+
+        ErrorResponse response = new ErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                ex.getMessage(),
+                null
+        );
+
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
     // Student not found

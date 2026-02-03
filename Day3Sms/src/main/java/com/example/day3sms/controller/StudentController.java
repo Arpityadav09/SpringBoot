@@ -5,9 +5,11 @@ import com.example.day3sms.dto.StudentResponseDto;
 import com.example.day3sms.model.StudentModel;
 import com.example.day3sms.serves.StudentServes;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 public class StudentController {
@@ -19,7 +21,7 @@ public class StudentController {
     public StudentResponseDto addStudent(@Valid  @RequestBody StudentRequestdto student){
        return service.addStudent(student);
    }
-   @GetMapping("/students")
+   @GetMapping("/getstudents")
     public List<StudentResponseDto> getStudent(){
        return service.getStudents();
    }
@@ -27,4 +29,12 @@ public class StudentController {
     public StudentModel updateStudent(@PathVariable String id, @RequestBody StudentModel student){
        return service.upadteStudent(id,student);
     }
+    @DeleteMapping("/student/{id}")
+    public ResponseEntity<?> deleteStudent(@PathVariable String id) {
+        service.deleteStudent(id);
+        return ResponseEntity.ok(
+                Map.of("message", "Student deleted successfully")
+        );
+    }
+
 }

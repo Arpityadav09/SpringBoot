@@ -2,6 +2,7 @@ package com.example.day3sms.serves;
 
 import com.example.day3sms.dto.StudentRequestdto;
 import com.example.day3sms.dto.StudentResponseDto;
+import com.example.day3sms.exception.ResourceNotFoundException;
 import com.example.day3sms.model.StudentModel;
 import com.example.day3sms.repository.StudentRepo;
 import jakarta.validation.Valid;
@@ -52,4 +53,15 @@ public class StudentServes {
         existingStudent.setEmail(student.getEmail());
         return repository.save(existingStudent);
     }
+    // delete student
+    public void deleteStudent(String id) {
+
+        StudentModel student = repository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Student not found with id: " + id)
+                );
+
+        repository.delete(student);
+    }
+
 }
