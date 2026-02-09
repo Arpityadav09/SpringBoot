@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-
+@CrossOrigin(origins ="*")
 @RestController
 public class StudentController {
    private final StudentServes service;
@@ -25,7 +25,7 @@ public class StudentController {
     public List<StudentResponseDto> getStudent(){
        return service.getStudents();
    }
-    @GetMapping("/upadate/{id}")
+    @PutMapping("/update/{id}")
     public StudentModel updateStudent(@PathVariable String id, @RequestBody StudentModel student){
        return service.upadteStudent(id,student);
     }
@@ -36,5 +36,11 @@ public class StudentController {
                 Map.of("message", "Student deleted successfully")
         );
     }
-
+    @PatchMapping("/student/{id}")
+    public StudentResponseDto patchStudent(
+            @PathVariable String id,
+            @RequestBody StudentRequestdto studentDto
+    ) {
+        return service.patchStudent(id, studentDto);
+    }
 }
