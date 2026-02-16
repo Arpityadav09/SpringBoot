@@ -19,6 +19,7 @@ public class TodoController {
     }
     @PostMapping("/create")
     public TodoModel create(@RequestBody TodoModel todoModel){
+        todoModel.setId(null);
         return service.create(todoModel);
     }
     @PutMapping("/update/{id}")

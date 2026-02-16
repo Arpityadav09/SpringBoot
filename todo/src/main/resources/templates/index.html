@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Todo Tasker</title>
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --accent-primary: #8b5cf6;
+            --accent-secondary: #06b6d4;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --danger: #ef4444;
+            --success: #10b981;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--bg-dark);
+            /* Subtle mesh gradient for depth */
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.15) 0px, transparent 50%);
+        }
+
+        .container {
+            width: 550px; /* Increased size */
+            padding: 40px;
+            border-radius: 24px;
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            text-align: left;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(to right, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        input {
+            flex: 1;
+            padding: 16px 20px;
+            border: 2px solid rgba(255, 255, 255, 0.05);
+            border-radius: 14px;
+            background: rgba(15, 23, 42, 0.6);
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            border-color: var(--accent-primary);
+            background: rgba(15, 23, 42, 0.9);
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.2);
+        }
+
+        .add-btn {
+            padding: 0 25px;
+            border: none;
+            border-radius: 14px;
+            background: var(--accent-primary);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .add-btn:hover {
+            background: #7c3aed;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(139, 92, 246, 0.4);
+        }
+
+        ul {
+            list-style: none;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        /* Custom Scrollbar */
+        ul::-webkit-scrollbar { width: 5px; }
+        ul::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+
+        li {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 16px 20px;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: transform 0.2s ease;
+        }
+
+        li:hover {
+            transform: scale(1.02);
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .todo-text {
+            color: var(--text-main);
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .completed {
+            text-decoration: line-through;
+            color: var(--text-dim);
+            opacity: 0.5;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btns button {
+            width: 38px;
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .toggle-btn { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+        .toggle-btn:hover { background: var(--success); color: white; }
+
+        .delete-btn { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+        .delete-btn:hover { background: var(--danger); color: white; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>My Tasks</h1>
+
+    <div class="input-group">
+        <input type="text" id="todoInput" placeholder="What needs to be done?">
+        <button class="add-btn" onclick="addTodo()">Add Task</button>
+    </div>
+
+    <ul id="todoList">
+        </ul>
+</div>
+
+<script>
+    const API_URL = "http://localhost:8080";
+
+    async function loadTodos(){
+        try {
+            const res = await fetch(API_URL);
+            const data = await res.json();
+            const list = document.getElementById("todoList");
+            list.innerHTML="";
+
+            data.forEach(todo=>{
+                const li = document.createElement("li");
+                li.innerHTML = `
+                    <span class="todo-text ${todo.completed ? 'completed' : ''}">
+                        ${todo.title}
+                    </span>
+                    <div class="action-btns">
+                        <button class="toggle-btn" onclick="toggleTodo('${todo.id}', ${todo.completed}, '${todo.title}')" title="Mark Complete">✓</button>
+                        <button class="delete-btn" onclick="deleteTodo('${todo.id}')" title="Delete Task">✕</button>
+                    </div>
+                `;
+                list.appendChild(li);
+            });
+        } catch (err) {
+            console.error("Backend not reachable. Ensure your API is running at", API_URL);
+        }
+    }
+
+    async function addTodo(){
+        const input = document.getElementById("todoInput");
+        if(input.value.trim()==="") return;
+
+        await fetch(`${API_URL}/create`,{
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({ title:input.value, completed:false })
+        });
+
+        input.value="";
+        loadTodos();
+    }
+
+    async function deleteTodo(id){
+        await fetch(`${API_URL}/delete/${id}`,{ method:"DELETE" });
+        loadTodos();
+    }
+
+    async function toggleTodo(id, completed, title){
+        await fetch(`${API_URL}/update/${id}`,{
+            method:"PUT",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({ title:title, completed:!completed })
+        });
+        loadTodos();
+    }
+
+    loadTodos();
+</script>
+
+</body>
+</html>
